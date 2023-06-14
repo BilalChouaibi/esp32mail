@@ -16,7 +16,7 @@
 #define SMTP_PORT esp_mail_smtp_port_587
 #define AUTHOR_EMAIL "sigmasnec@gmail.com"
 #define AUTHOR_PASSWORD "hsonlwhmaaoemkid"
-#define RECIPIENT_EMAIL "95500.BD@gmail.com"
+#define RECIPIENT_EMAIL "chouaibi.bilal1@gmail.com"
 
 // Structures
 esp_now_peer_info_t receiverInfo;
@@ -27,7 +27,6 @@ typedef struct {
 } SensorData;
 
 // Variables
-bool sending = false;
 SMTPSession smtp;
 SensorData myData;
 
@@ -35,7 +34,7 @@ SensorData myData;
 uint8_t MAC_recepteur[] = {0x08, 0x3A, 0x8D, 0x2F, 0x14, 0x20};
 
 // Variables pour l'envoi du mail
-bool emailSent = false; // Indicateur de l'envoi du courrier électronique
+RTC_DATA_ATTR bool emailSent = false; // Indicateur de l'envoi du courrier électronique
 int emailInterval = 4320; // nombre de reboot min pour envoi email (équivalent 1 jour)
 RTC_DATA_ATTR int lastEmailTime = 4320; // nombre de reboot sans envoi de mail
 
@@ -73,8 +72,6 @@ void connectToWiFi() {
   }
 
   Serial.println();
-  Serial.print("Connected with IP: ");
-  Serial.println(WiFi.localIP());
 }
 
 int measureDistance() {
@@ -143,6 +140,7 @@ void loop() {
   Serial.println();
   Serial.print("Connected with IP: ");
   Serial.println(WiFi.localIP());
+  Serial.print("battery: ");
   Serial.println(myData.battery);
 
   myData.id = 1;
@@ -165,11 +163,18 @@ void loop() {
     emailSent = true;
     lastEmailTime = 0;
   }
-  else {
+  else if(lastEmailTime >= emailInterval || myData.value < 35) {
     emailSent = false;
     }
   Serial.println("**********reboot**********");
   Serial.println(lastEmailTime);
+  Serial.println("**********email sent?**********");
+  if (emailSent == true){
+    Serial.println("yes");
+    }
+  else{
+    Serial.println("no");
+    }
   delay(2500);
 
   // Mettre en veille profonde pendant 20 secondes
